@@ -32,6 +32,19 @@ bindsym XF86MonBrightnessUp exec busctl --system call me.xela.blctl /me/xela/blc
 bindsym XF86MonBrightnessDown exec busctl --system call me.xela.blctl /me/xela/blctl me.xela.blctl1 Decrease u 5
 ```
 
-### Supported distributions and devices
+### Supported distributions
 
-Blclt is distirbution-agnostic but needs to be compiled manually and requires you to write a config for whatever init system you use (or use one from the examples). As long as you do those, it will work on any combination of distribution and init system. I personally use blctl with Void Linux, runit and Sway.
+Blclt is distribution and init-system agnostic but needs to be compiled manually and requires you to write a config for whatever init system you use. As long as you do those, it should in theory work on any combination of distribution and init system. I personally use Blctl with Void Linux, runit and Sway.
+
+### Supported devices
+
+Only AMD integrated laptop graphics is supported currently, but the ability to specify your device's kernel backlight interface filepath using a config file is planned. Ideally, at some point in the future, Blctl would be able to automatically detect the correct filepath for your device, without the need of editing a config file.
+
+### Compiling Blctl
+
+1. Download and install [Rustup](https://www.rust-lang.org/tools/install)
+2. Clone this repository to a location of your choice
+3. Navigate to where you cloned the repository
+4. Run `cargo build --release`
+
+This will compile the code and produce an executable located in `target/release`.
