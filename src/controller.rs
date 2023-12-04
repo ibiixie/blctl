@@ -1,11 +1,26 @@
 use crate::kernelinterface;
 
+// Paths are relative to the backlight device directory
+const BACKLIGHT_BRIGHTNESS_FILEPATH: &'static str = "brightness";
+const BACKLIGHT_MAX_BRIGHTNESS_FILEPATH: &'static str = "max_brightness";
+
 pub struct BacklightController {
-    pub kernel_brightness_fp: String,
-    pub kernel_max_brightness_fp: String
+    kernel_brightness_fp: String,
+    kernel_max_brightness_fp: String
 }
 
 impl BacklightController {
+    pub fn new(interface_path: &String) -> Self {
+        let interface_path = std::path::Path::new(interface_path);
+        let kernel_brightness_fp = interface_path.join(std::path::Path::new(BACKLIGHT_BRIGHTNESS_FILEPATH));
+        let kernel_max_brightness_fp = interface_path.join(std::path::Path::new(BACKLIGHT_MAX_BRIGHTNESS_FILEPATH));
+
+        Self {
+            kernel_brightness_fp: kernel_brightness_fp.to_str().unwrap().to_string(),
+            kernel_max_brightness_fp: kernel_max_brightness_fp.to_str().unwrap().to_string()
+        }
+    }
+
     pub fn increase_brightness(&self, amount: f32) {
         let current = self.get_brightness();
         let new = current + amount;
