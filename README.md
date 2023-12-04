@@ -36,9 +36,22 @@ bindsym XF86MonBrightnessDown exec busctl --system call me.xela.blctl /me/xela/b
 
 Blclt is distribution and init-system agnostic but needs to be compiled manually and requires you to write a config for whatever init system you use. As long as you do those, it should in theory work on any combination of distribution and init system. I personally use Blctl with Void Linux, runit and Sway.
 
-### Supported devices
+### Config
 
-Only AMD integrated laptop graphics is supported currently, but the ability to specify your device's kernel backlight interface filepath using a config file is planned. Ideally, at some point in the future, Blctl would be able to automatically detect the correct filepath for your device, without the need of editing a config file.
+No config file exists by default, but one with the name `config.toml` can be created in `/etc/blctl` (e.g.: `touch "/etc/blctl/config.toml"`.
+
+**Config options:**
+
+ * `interface_override`<br>*Allows for the automatically selected backlight interface to be overridden with a manually set path.*
+
+**Example base config**
+
+```toml
+# /etc/blctl/config.toml
+
+# Allows for the automatically selected backlight interface to be overridden with a manually set path.
+# interface_override = "/sys/class/backlight/example_backlight/"
+```
 
 ### Compiling Blctl
 
