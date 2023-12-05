@@ -61,3 +61,14 @@ No config file exists by default, but one with the name `config.toml` can be cre
 4. Run `cargo build --release`
 
 This will compile the code and produce an executable located in `target/release`.
+
+## License
+
+Licensed under either of
+
+ * Apache License, Version 2.0
+   ([LICENSE-APACHE](LICENSE-APACHE) or http://www.apache.org/license/LICENSE-2.0)
+ * MIT license
+   ([LICENSE-MIT](LICENSE-MIT) or http://opensource.org/licenses/MIT)
+
+at your option.
