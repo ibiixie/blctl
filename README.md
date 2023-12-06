@@ -55,10 +55,6 @@ bindsym XF86MonBrightnessDown exec busctl --system call me.xela.blctl /me/xela/b
 
 ## Compiling and installing
 
-1. Download and install [Rustup](https://www.rust-lang.org/tools/install).
-2. Clone this repository to a location of your choice and navigate to it in your terminal.
-3. Run `cargo install`.
-
 1. Download and install [Rustup](https://www.rust-lang.org/tools/install)
 2. Clone this repository to a location of your choice
 3. Navigate to where you cloned the repository
