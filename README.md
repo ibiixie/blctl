@@ -3,7 +3,7 @@ A D-Bus based **b**ack**l**ight **c**on**t**ro**l** daemon for Linux.
 
 ### Distribution support
 
-Blctl can be compiled for and runs on any distribution but only includes a service configuration for runit/Void Linux. If you write your own service configuration, Blctl should work fine. Feel free to contribute your service configuration to `examples/daemon/` if you do! :)
+Blctl can be compiled for and runs on any distribution but only includes a service configuration for runit/Void Linux. If you write your own service configuration, Blctl should work fine. Feel free to contribute your service configuration to `service-configs/` if you do! :)
 
 Do note that Blctl requires read and write access to the sysfs backlight device directory (`/sys/class/backlight/`). If you do write your own service configuration, keep that in mind. For runit, this is a non-problem since it runs services as root.
 
