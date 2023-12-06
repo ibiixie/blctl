@@ -1,15 +1,9 @@
 # blctl
 A D-Bus based **b**ack**l**ight **c**on**t**ro**l** daemon for Linux.
 
-### Distribution support
-
-Blctl can be compiled for and runs on any distribution but only includes a service configuration for runit/Void Linux. If you write your own service configuration, Blctl should work fine. Feel free to contribute your service configuration to `service-configs/` if you do! :)
-
-Do note that Blctl requires read and write access to the sysfs backlight device directory (`/sys/class/backlight/`). If you do write your own service configuration, keep that in mind. For runit, this is a non-problem since it runs services as root.
-
 ## Usage
 
-You can call into Blctl through the system-wide message bus.
+You can call into blctl through the system-wide message bus.
 
 Increase backlight brightness by 5%
 
@@ -25,7 +19,7 @@ $ busctl --system call me.xela.blctl /me/xela/blctl me.xela.blctl1 Decrease u 25
 
 ## Config
 
-No config file exists by default, but one with the name `config.toml` can be created in `/etc/blctl` (e.g.: `touch "/etc/blctl/config.toml"`.
+No config file exists by default, but one with the name `config.toml` can be created in `/etc/blctl` (e.g.: `touch "/etc/blctl/config.toml"`).
 
 **Config options:**
 
@@ -42,7 +36,7 @@ No config file exists by default, but one with the name `config.toml` can be cre
 
 ### Backlight keys
 
-If you want to setup Blctl to be connected to the backlight keys on your keyboard, you can do so by configuring your desktop environment or window manager to call Blctl via its system-wide message bus.
+If you want to setup blctl to be connected to the backlight keys on your keyboard, you can do so by configuring your desktop environment or window manager to call blctl via its system-wide message bus.
 
 Here is an example of how I accomplish this using Sway:
 
@@ -55,12 +49,23 @@ bindsym XF86MonBrightnessDown exec busctl --system call me.xela.blctl /me/xela/b
 
 ## Compiling and installing
 
-1. Download and install [Rustup](https://www.rust-lang.org/tools/install)
-2. Clone this repository to a location of your choice
-3. Navigate to where you cloned the repository
-4. Run `cargo build --release`
+To compile and install blctl, simply run the `install.sh` script in the root directory of the repository:
 
-This will compile Blctl and place the binary in `~/.cargo/bin/`.
+```bash
+$ ./install.sh
+```
+
+This will automatically install blctl to `/usr/bin/`.
+
+If you use runit, you can pass `--runit` as a parameter to the installer and it will automatically copy a default service configuration file for you:
+
+```bash
+$ ./install.sh --runit
+```
+
+If you use another init system, you will have to create your own service configuration to use with blctl. Feel free to contribute your config to `./service-configs/` if you do! :)
+
+Note that blctl at minimum requires read and write access to the sysfs backlight device directory (`/sys/class/backlight`) to function properly.
 
 ## License
 
