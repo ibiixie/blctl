@@ -1,23 +1,26 @@
 use crate::kernelinterface;
 
 // Paths are relative to the backlight device directory
-const BACKLIGHT_BRIGHTNESS_FILEPATH: &'static str = "brightness";
-const BACKLIGHT_MAX_BRIGHTNESS_FILEPATH: &'static str = "max_brightness";
+const BACKLIGHT_BRIGHTNESS_FILEPATH: &str = "brightness";
+const BACKLIGHT_MAX_BRIGHTNESS_FILEPATH: &str = "max_brightness";
 
+#[allow(clippy::module_name_repetitions)]
 pub struct BacklightController {
     kernel_brightness_fp: String,
-    kernel_max_brightness_fp: String
+    kernel_max_brightness_fp: String,
 }
 
 impl BacklightController {
     pub fn new(interface_path: &String) -> Self {
         let interface_path = std::path::Path::new(interface_path);
-        let kernel_brightness_fp = interface_path.join(std::path::Path::new(BACKLIGHT_BRIGHTNESS_FILEPATH));
-        let kernel_max_brightness_fp = interface_path.join(std::path::Path::new(BACKLIGHT_MAX_BRIGHTNESS_FILEPATH));
+        let kernel_brightness_fp =
+            interface_path.join(std::path::Path::new(BACKLIGHT_BRIGHTNESS_FILEPATH));
+        let kernel_max_brightness_fp =
+            interface_path.join(std::path::Path::new(BACKLIGHT_MAX_BRIGHTNESS_FILEPATH));
 
         Self {
             kernel_brightness_fp: kernel_brightness_fp.to_str().unwrap().to_string(),
-            kernel_max_brightness_fp: kernel_max_brightness_fp.to_str().unwrap().to_string()
+            kernel_max_brightness_fp: kernel_max_brightness_fp.to_str().unwrap().to_string(),
         }
     }
 
@@ -39,33 +42,37 @@ impl BacklightController {
         if value > 1f32 {
             value = 1f32;
         } else if value < 0f32 {
-            value = 0f32
+            value = 0f32;
         }
 
         let value_abs = self.percent_to_abs(value);
 
-        kernelinterface::write(&self.kernel_brightness_fp, value_abs.to_string());
+        kernelinterface::write(&self.kernel_brightness_fp, &value_abs.to_string());
     }
 
     pub fn get_brightness(&self) -> f32 {
         let brightness_abs = kernelinterface::read(&self.kernel_brightness_fp)
             .trim()
             .parse::<u32>()
-            .expect(format!(
-                "failed to parse kernel interface ({}) data to u32",
-                &self.kernel_brightness_fp
-            ).as_str());
+            .unwrap_or_else(|_| {
+                panic!(
+                    "failed to parse kernel interface ({}) data to u32",
+                    &self.kernel_brightness_fp
+                )
+            });
 
         let abs_percent = self.abs_to_percent(brightness_abs);
 
-        self.round_to_decimal(abs_percent, 2)
+        Self::round_to_decimal(abs_percent, 2)
     }
 
     /// Somewhat unreliably rounds an `f32` value to the specified amount of
-    /// decimals. I should proably fix this at some point.
-    fn round_to_decimal(&self, value: f32, decimal: u32) -> f32 {
-        let power = i32::pow(10, decimal) as f32;
-        f32::round(value * power) / power
+    /// decimals.
+    fn round_to_decimal(value: f32, decimal: u32) -> f32 {
+        let power = i32::pow(10, decimal);
+
+        // Todo: fix lossiness here
+        f32::round(value * power as f32) / power as f32
     }
 
     /// Converts a backlight brightness percentage to the equivalent
@@ -74,13 +81,15 @@ impl BacklightController {
         let max_abs = kernelinterface::read(&self.kernel_max_brightness_fp)
             .trim()
             .parse::<u32>()
-            .expect(format!(
-                "failed to parse kernel interface ({}) data to u32",
-                &self.kernel_max_brightness_fp
-            ).as_str());
+            .unwrap_or_else(|_| {
+                panic!(
+                    "failed to parse kernel interface ({}) data to u32",
+                    &self.kernel_max_brightness_fp
+                )
+            });
 
+        // Todo: fix lossiness here
         let absolute = value * max_abs as f32;
-
         absolute.round() as u32
     }
 
@@ -90,11 +99,14 @@ impl BacklightController {
         let max_abs = kernelinterface::read(&self.kernel_max_brightness_fp)
             .trim()
             .parse::<u32>()
-            .expect(format!(
-                "failed to parse kernel interface ({}) data to u32",
-                &self.kernel_max_brightness_fp
-            ).as_str());
+            .unwrap_or_else(|_| {
+                panic!(
+                    "failed to parse kernel interface ({}) data to u32",
+                    &self.kernel_max_brightness_fp
+                )
+            });
 
+        // Todo: fix lossiness here
         value as f32 / max_abs as f32
     }
 }
