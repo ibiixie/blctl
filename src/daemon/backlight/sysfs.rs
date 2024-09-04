@@ -95,67 +95,14 @@ mod tests {
     use super::*;
 
     #[test]
-    fn initialize_backlight() -> Result<(), Box<dyn Error>> {
-        Sysfs::new()?;
-        Ok(())
-    }
-
-    #[test]
-    fn read_brightness() -> Result<(), Box<dyn Error>> {
-        let backlight = Sysfs::new()?;
-        backlight.device_read::<i32>("brightness")?;
-        Ok(())
-    }
-
-    #[test]
-    fn read_max_brightness() -> Result<(), Box<dyn Error>> {
-        let backlight = Sysfs::new()?;
-        backlight.device_read::<i32>("max_brightness")?;
-        Ok(())
-    }
-
-    #[test]
-    fn write_brightness() -> Result<(), Box<dyn Error>> {
-        let backlight = Sysfs::new()?;
-
-        backlight.device_write("brightness", 0.to_string().as_bytes())?;
-
-        let max = backlight.device_read::<i32>("max_brightness")?;
-        backlight.device_write("brightness", max.to_string().as_bytes())?;
-
-        Ok(())
-    }
-
-    #[test]
-    fn get_brightness() -> Result<(), Box<dyn Error>> {
-        let backlight = Sysfs::new()?;
-
-        backlight.brightness()?;
-
-        Ok(())
-    }
-
-    #[test]
-    fn set_brightness() -> Result<(), Box<dyn Error>> {
+    fn full() -> Result<(), Box<dyn Error>> {
         let backlight = Sysfs::new()?;
 
         backlight.set_brightness(0)?;
         assert_eq!(backlight.brightness()?, 0);
-
-        Ok(())
-    }
-
-    #[test]
-    fn misc_brightness() -> Result<(), Box<dyn Error>> {
-        let backlight = Sysfs::new()?;
 
         backlight.set_brightness(backlight.max_brightness()?)?;
-        std::thread::sleep(std::time::Duration::from_secs(1));
         assert_eq!(backlight.brightness()?, backlight.max_brightness()?);
-
-        backlight.set_brightness(0)?;
-        std::thread::sleep(std::time::Duration::from_secs(1));
-        assert_eq!(backlight.brightness()?, 0);
 
         Ok(())
     }
