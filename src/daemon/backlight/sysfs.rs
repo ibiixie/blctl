@@ -150,11 +150,11 @@ mod tests {
         let backlight = Sysfs::new()?;
 
         backlight.set_brightness(backlight.max_brightness()?)?;
+        std::thread::sleep(std::time::Duration::from_secs(1));
         assert_eq!(backlight.brightness()?, backlight.max_brightness()?);
 
-        std::thread::sleep(std::time::Duration::from_secs(1));
-
         backlight.set_brightness(0)?;
+        std::thread::sleep(std::time::Duration::from_secs(1));
         assert_eq!(backlight.brightness()?, 0);
 
         Ok(())
