@@ -127,8 +127,30 @@ mod tests {
     }
 
     #[test]
+    fn get_brightness() -> Result<(), Box<dyn Error>> {
+        let backlight = Sysfs::new()?;
+
+        backlight.brightness()?;
+
+        Ok(())
+    }
+
+    #[test]
     fn set_brightness() -> Result<(), Box<dyn Error>> {
         let backlight = Sysfs::new()?;
+
+        backlight.set_brightness(0)?;
+        assert_eq!(backlight.brightness()?, 0);
+
+        Ok(())
+    }
+
+    #[test]
+    fn misc_brightness() -> Result<(), Box<dyn Error>> {
+        let backlight = Sysfs::new()?;
+
+        backlight.set_brightness(backlight.max_brightness()?)?;
+        assert_eq!(backlight.brightness()?, backlight.max_brightness()?);
 
         backlight.set_brightness(0)?;
         assert_eq!(backlight.brightness()?, 0);
