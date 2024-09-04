@@ -77,6 +77,7 @@ impl Sysfs {
         file.read_to_string(&mut buffer)?;
 
         Ok(buffer
+            .trim()
             .parse()
             .map_err(|_| {
                 Err::<T, Box<dyn Error>>("failed to parse data read from backlight device".into())
