@@ -152,6 +152,8 @@ mod tests {
         backlight.set_brightness(backlight.max_brightness()?)?;
         assert_eq!(backlight.brightness()?, backlight.max_brightness()?);
 
+        std::thread::sleep(std::time::Duration::from_secs(1));
+
         backlight.set_brightness(0)?;
         assert_eq!(backlight.brightness()?, 0);
 
