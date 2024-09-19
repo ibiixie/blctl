@@ -5,12 +5,20 @@ use std::error::Error;
 
 use clap::{Parser, Subcommand};
 
+mod backlight;
+use backlight::Backlight;
+
+mod blctl;
+
 #[derive(Subcommand, Clone, Debug)]
 pub enum Command {
-    Get,
-    Set { level: i32 },
-    Increase { amount: i32 },
-    Decrease { amount: i32 },
+    Set { level: i32, raw: bool },
+    Increase { amount: i32, raw: bool },
+    Decrease { amount: i32, raw: bool },
+    Get { raw: bool },
+    GetMax,
+    Store,
+    Restore,
 }
 
 #[derive(Parser)]
@@ -41,36 +49,31 @@ impl Cli {
 fn main() -> Result<(), Box<dyn Error>> {
     let args = Cli::parse();
 
+    // let backlight: Box<dyn Backlight> = Box::new(backlight::Sysfs::new()?);
+
     match args.command() {
-        Command::Get => {
-            get();
+        Command::Set { level, raw } => {
+            // set(level);
         }
-        Command::Set { level } => {
-            set(level);
+        Command::Increase { amount, raw } => {
+            // increase(amount);
         }
-        Command::Increase { amount } => {
-            increase(amount);
+        Command::Decrease { amount, raw } => {
+            // decrease(amount);
         }
-        Command::Decrease { amount } => {
-            decrease(amount);
+        Command::Get { raw } => {
+            
+        }
+        Command::GetMax => {
+            
+        }
+        Command::Store => {
+            
+        }
+        Command::Restore => {
+            
         }
     }
 
     Ok(())
-}
-
-fn get() {
-    println!("0");
-}
-
-fn set(level: i32) {
-    println!("{level}");
-}
-
-fn increase(amount: i32) {
-    println!("{amount}");
-}
-
-fn decrease(amount: i32) {
-    println!("{amount}");
 }

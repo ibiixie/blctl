@@ -24,4 +24,14 @@ pub trait Backlight {
     /// # Errors
     /// N/A
     fn brightness(&self) -> Result<i32, Box<dyn Error>>;
+
+    /// Returns the maximum backlight brightness.
+    /// 
+    /// # Notes
+    /// The value returned is dependent on the backlight device driver.
+    /// Different vendors use different maximum values for their backlight.
+    /// 
+    /// # Errors
+    /// N/A
+    fn brightness_max(&self) -> Result<i32, Box<dyn Error>>;
 }

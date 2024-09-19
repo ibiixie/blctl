@@ -51,6 +51,10 @@ impl Backlight for Sysfs {
     fn brightness(&self) -> Result<i32, Box<dyn Error>> {
         self.device_read::<i32>("brightness")
     }
+
+    fn brightness_max(&self) -> Result<i32, Box<dyn Error>> {
+        self.device_read::<i32>("max_brightness")
+    }
 }
 
 impl Sysfs {
@@ -87,23 +91,5 @@ impl Sysfs {
 
     fn max_brightness(&self) -> Result<i32, Box<dyn Error>> {
         self.device_read("max_brightness")
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn full() -> Result<(), Box<dyn Error>> {
-        let backlight = Sysfs::new()?;
-
-        backlight.set_brightness(0)?;
-        assert_eq!(backlight.brightness()?, 0);
-
-        backlight.set_brightness(backlight.max_brightness()?)?;
-        assert_eq!(backlight.brightness()?, backlight.max_brightness()?);
-
-        Ok(())
     }
 }

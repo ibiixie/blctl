@@ -12,9 +12,9 @@ clap = { version = "4.5.16", features = ["derive"] }
 # config = "0.13.4"
 
 [[bin]]
-name = "daemon"
-path = "src/daemon/main.rs"
+name = "blctl"
+path = "src/client/main.rs"
 
 [[bin]]
-name = "client"
-path = "src/client/main.rs"
+name = "blctld"
+path = "src/daemon/main.rs"
