@@ -1,6 +1,6 @@
 [package]
 name = "blctl-shared"
-author = "xela"
+author = "imxela <hi@xela.me>"
 version = "0.1.0"
 edition = "2021"
 license = "MIT OR Apache-2.0"
