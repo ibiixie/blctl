@@ -5,11 +5,6 @@ use std::error::Error;
 
 use clap::{Parser, Subcommand};
 
-mod backlight;
-use backlight::Backlight;
-
-mod blctl;
-
 #[derive(Subcommand, Clone, Debug)]
 pub enum Command {
     Set { level: i32, raw: bool },
@@ -49,17 +44,15 @@ impl Cli {
 fn main() -> Result<(), Box<dyn Error>> {
     let args = Cli::parse();
 
-    // let backlight: Box<dyn Backlight> = Box::new(backlight::Sysfs::new()?);
-
     match args.command() {
         Command::Set { level, raw } => {
-            // set(level);
+
         }
         Command::Increase { amount, raw } => {
-            // increase(amount);
+
         }
         Command::Decrease { amount, raw } => {
-            // decrease(amount);
+
         }
         Command::Get { raw } => {
             
