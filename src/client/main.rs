@@ -3,43 +3,12 @@
 
 use std::error::Error;
 
-use clap::{Parser, Subcommand};
+use clap::Parser;
 
-#[derive(Subcommand, Clone, Debug)]
-pub enum Command {
-    Set { level: i32, raw: bool },
-    Increase { amount: i32, raw: bool },
-    Decrease { amount: i32, raw: bool },
-    Get { raw: bool },
-    GetMax,
-    Store,
-    Restore,
-}
+mod blctl;
 
-#[derive(Parser)]
-#[command(arg_required_else_help = true)]
-#[command(author, version, about, long_about = None)]
-pub struct Cli {
-    #[command(subcommand)]
-    command: Option<Command>,
-}
-
-impl Cli {
-    #[must_use]
-    pub fn command(&self) -> Command {
-        self.command.clone().unwrap()
-    }
-
-    fn get() -> Result<(), Box<dyn Error>> {
-        println!("Backlight brightness level is 255");
-        Ok(())
-    }
-
-    fn set(level: i32) -> Result<(), Box<dyn Error>> {
-        println!("Setting backlight brightness level to {}", level);
-        Ok(())
-    }
-}
+use blctl::Cli;
+use blctl_shared::Command;
 
 fn main() -> Result<(), Box<dyn Error>> {
     let args = Cli::parse();

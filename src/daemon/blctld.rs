@@ -1,10 +1,10 @@
 // use backlight::{Backlight, Sysfs};
 
-struct Blctl {
+struct Daemon {
     // backlight: Box<dyn Backlight>
 }
 
-impl Blctl {
+impl Daemon {
     fn new() -> Self {
         Self {
             // backlight: Box::new(Sysfs::new());
