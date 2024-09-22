@@ -1,6 +1,7 @@
 use clap::Subcommand;
+use serde::{Deserialize, Serialize};
 
-#[derive(Subcommand, Clone, Debug)]
+#[derive(Subcommand, Deserialize, Serialize, Clone, Debug)]
 pub enum Request {
     /// Set backlight brightness to the specified level
     Set {
@@ -58,7 +59,7 @@ pub enum Request {
     Restore,
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Deserialize, Serialize, Debug)]
 pub enum Response {
     Success { level: i32, raw: bool },
     Failure { reason: String },
