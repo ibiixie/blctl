@@ -48,13 +48,15 @@ impl Blctl {
             .expect("failed to open IPC socket - is the blctl daemon running?");
         
         let request_data = bincode::serialize(&request).unwrap();
-        ipc_stream.write(request_data.as_slice()).unwrap();
+        ipc_stream.write_all(request_data.as_slice()).unwrap();
         
-        let mut response_data: Vec<u8>;
+        let mut response_data: Vec<u8> = Vec::new();
         ipc_stream.read_to_end(&mut response_data).unwrap();
         let response = bincode::deserialize::<Response>(response_data.as_slice()).unwrap();
 
         dbg!(response);
+
+        println!("Communications succecssful!");
 
         result
     }

@@ -4,12 +4,12 @@ use crate::backlight::{Backlight, Sysfs};
 
 use blctl_shared::{Request, Response};
 
-struct Daemon {
+pub struct Daemon {
     // backlight: Box<dyn Backlight>
 }
 
 impl Daemon {
-    fn new() -> Self {
+    pub fn new() -> Self {
         let listener = std::os::unix::net::UnixListener::bind("/tmp/blctld.sock")
             .unwrap();
 
@@ -33,7 +33,9 @@ impl Daemon {
                     };
 
                     let response_data = bincode::serialize(&response).unwrap();
-                    stream.write(response_data.as_slice()).unwrap();
+                    stream.write_all(response_data.as_slice()).unwrap();
+
+                    println!("Communications successful!");
                 },
                 Err(err) => {
                     break;

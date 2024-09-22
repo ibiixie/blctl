@@ -6,4 +6,6 @@ mod blctld;
 
 fn main() {
     println!("Daemon init");
+
+    blctld::Daemon::new();
 }

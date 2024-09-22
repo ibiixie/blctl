@@ -1,7 +1,7 @@
 use clap::Subcommand;
 use serde::{Deserialize, Serialize};
 
-#[derive(Subcommand, Deserialize, Serialize, Clone, Debug)]
+#[derive(Subcommand, Deserialize, Serialize, Clone, Copy, Debug)]
 pub enum Request {
     /// Set backlight brightness to the specified level
     Set {
