@@ -1,7 +1,7 @@
 use clap::Subcommand;
 
 #[derive(Subcommand, Clone, Debug)]
-pub enum Command {
+pub enum Request {
     /// Set backlight brightness to the specified level
     Set {
         /// Desired brightness level between 0 and 100 inclusive
@@ -56,4 +56,11 @@ pub enum Command {
 
     /// Set backlight brightness to the previously stored value
     Restore,
+}
+
+#[derive(Clone, Debug)]
+struct Response {
+    Success,
+    Success { level: i32, raw: bool },
+    Failure { reason: String },
 }

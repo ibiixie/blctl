@@ -12,10 +12,11 @@ use blctl_shared::Command;
 
 fn main() -> Result<(), Box<dyn Error>> {
     let args = Cli::parse();
+    
 
     match args.command() {
         Command::Set { level, raw } => {
-
+            
         }
         Command::Increase { amount, raw } => {
 
