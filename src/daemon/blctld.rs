@@ -1,4 +1,4 @@
-// use backlight::{Backlight, Sysfs};
+use crate::backlight::{Backlight, Sysfs};
 
 struct Daemon {
     // backlight: Box<dyn Backlight>

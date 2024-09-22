@@ -29,13 +29,13 @@ impl Backlight for Sysfs {
 
             Ok(Self { device_path })
         } else {
-            Err("no backlight devices found in sysfs".into())
+            Err("no backlight device found in sysfs".into())
         }
     }
 
     fn set_brightness(&self, level: i32) -> Result<(), Box<dyn Error>> {
         let mut level = level;
-        let max_brightness = self.max_brightness()?;
+        let max_brightness = self.brightness_max()?;
 
         // Clamp to maximum allowed value as defined by the backlight device
         if level > max_brightness {
@@ -87,9 +87,5 @@ impl Sysfs {
                 Err::<T, Box<dyn Error>>("failed to parse data read from backlight device".into())
             })
             .unwrap())
-    }
-
-    fn max_brightness(&self) -> Result<i32, Box<dyn Error>> {
-        self.device_read("max_brightness")
     }
 }

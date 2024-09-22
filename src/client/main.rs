@@ -6,37 +6,22 @@ use std::error::Error;
 use clap::Parser;
 
 mod blctl;
+use blctl::{Blctl, CliArgs};
 
-use blctl::Cli;
-use blctl_shared::Command;
+use blctl_shared::Response;
 
-fn main() -> Result<(), Box<dyn Error>> {
-    let args = Cli::parse();
-    
+fn main() -> Result<(), String> {
+    let args = CliArgs::parse();
 
-    match args.command() {
-        Command::Set { level, raw } => {
-            
+    // Run the cli command and make the corresponding request to the daemon
+    return match Blctl::new(args.verbose).run(args.request()) {
+        Response::Success { level, raw } => {
+            println!("{level}");
+            Ok(())
         }
-        Command::Increase { amount, raw } => {
-
+        Response::Failure { reason } => {
+            println!("{reason}");
+            Err(reason)
         }
-        Command::Decrease { amount, raw } => {
-
-        }
-        Command::Get { raw } => {
-            
-        }
-        Command::GetMax => {
-            
-        }
-        Command::Store => {
-            
-        }
-        Command::Restore => {
-            
-        }
-    }
-
-    Ok(())
+    };
 }

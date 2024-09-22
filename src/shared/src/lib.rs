@@ -11,7 +11,7 @@ pub enum Request {
         /// backlight device driver as opposed to a value mapped between
         /// 0 and 100 inclusive
         #[arg(long)]
-        raw: bool
+        raw: bool,
     },
 
     /// Increase backlight brightness by the specified amount
@@ -23,7 +23,7 @@ pub enum Request {
         /// backlight device driver as opposed to a value mapped between
         /// 0 and 100 inclusive
         #[arg(long)]
-        raw: bool
+        raw: bool,
     },
 
     /// Decrease backlight brightness by the specified amount
@@ -35,7 +35,7 @@ pub enum Request {
         /// backlight device driver as opposed to a value mapped between
         /// 0 and 100 inclusive
         #[arg(long)]
-        raw: bool
+        raw: bool,
     },
 
     /// Return the current backlight brightness level
@@ -44,7 +44,7 @@ pub enum Request {
         /// backlight device driver as opposed to a value mapped between
         /// 0 and 100 inclusive
         #[arg(long)]
-        raw: bool
+        raw: bool,
     },
 
     /// Return the maximum supported backlight brightness level as defined
@@ -59,8 +59,7 @@ pub enum Request {
 }
 
 #[derive(Clone, Debug)]
-struct Response {
-    Success,
+pub enum Response {
     Success { level: i32, raw: bool },
     Failure { reason: String },
 }
