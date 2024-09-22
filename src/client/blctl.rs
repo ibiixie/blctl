@@ -1,3 +1,5 @@
+use std::io::{Read, Write};
+
 use clap::Parser;
 
 use blctl_shared::{Request, Response};
@@ -41,6 +43,18 @@ impl Blctl {
             Request::Store => self.store(),
             Request::Restore => self.restore(),
         };
+
+        let mut ipc_stream = std::os::unix::net::UnixStream::connect("/tmp/blctld.sock")
+            .expect("failed to open IPC socket - is the blctl daemon running?");
+        
+        let request_data = bincode::serialize(&request).unwrap();
+        ipc_stream.write(request_data.as_slice()).unwrap();
+        
+        let mut response_data: Vec<u8>;
+        ipc_stream.read_to_end(&mut response_data).unwrap();
+        let response = bincode::deserialize::<Response>(response_data.as_slice()).unwrap();
+
+        dbg!(response);
 
         result
     }
