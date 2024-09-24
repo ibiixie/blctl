@@ -1,4 +1,4 @@
-use std::io::{Read, Write};
+use std::io::prelude::*;
 
 use clap::Parser;
 
@@ -45,18 +45,30 @@ impl Blctl {
         };
 
         let mut ipc_stream = std::os::unix::net::UnixStream::connect("/tmp/blctld.sock")
-            .expect("failed to open IPC socket - is the blctl daemon running?");
+            .expect("socket connect failure (is the blctl daemon running?)");
         
         let request_data = bincode::serialize(&request).unwrap();
+        println!("Request data size is {}", request_data.len());
+
+        ipc_stream.write_all(&request_data.len().to_ne_bytes()).unwrap();
         ipc_stream.write_all(request_data.as_slice()).unwrap();
+        ipc_stream.flush().unwrap();
+        println!("Socket write success");
         
-        let mut response_data: Vec<u8> = Vec::new();
-        ipc_stream.read_to_end(&mut response_data).unwrap();
-        let response = bincode::deserialize::<Response>(response_data.as_slice()).unwrap();
+        let mut message_length = [0u8; std::mem::size_of::<usize>()];
+        ipc_stream.read_exact(&mut message_length).unwrap();
 
+        let message_length = usize::from_ne_bytes(message_length);
+        println!("Message received, length is {message_length}");
+
+        let mut response_data: Vec<u8> = vec![0u8; message_length];
+        ipc_stream.read_exact(&mut response_data).unwrap();
+        // let mut response_data: Vec<u8> = Vec::new();
+        // ipc_stream.read_to_end(&mut response_data).unwrap();
+        let response = bincode::deserialize::<Response>(&response_data).unwrap();
+
+        println!("Socket read success");
         dbg!(response);
-
-        println!("Communications succecssful!");
 
         result
     }
