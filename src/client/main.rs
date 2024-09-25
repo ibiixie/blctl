@@ -8,6 +8,9 @@ use clap::Parser;
 mod blctl;
 use blctl::{Blctl, CliArgs};
 
+mod ipc;
+use ipc::IpcClient;
+
 use blctl_shared::Response;
 
 fn main() -> Result<(), String> {

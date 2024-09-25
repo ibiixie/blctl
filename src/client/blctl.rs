@@ -1,7 +1,8 @@
-use std::io::prelude::*;
+use std::{io::prelude::*, path::Path};
 
 use clap::Parser;
 
+use crate::ipc::IpcClient;
 use blctl_shared::{Request, Response};
 
 #[derive(Parser)]
@@ -44,6 +45,10 @@ impl Blctl {
             Request::Restore => self.restore(),
         };
 
+        let mut ipc_client = IpcClient::new(Path::new("/tmp/blctld.sock"));
+        let _ = ipc_client.request(request);
+
+        /*
         let mut ipc_stream = std::os::unix::net::UnixStream::connect("/tmp/blctld.sock")
             .expect("socket connect failure (is the blctl daemon running?)");
         
@@ -69,6 +74,7 @@ impl Blctl {
 
         println!("Socket read success");
         dbg!(response);
+        */
 
         result
     }
