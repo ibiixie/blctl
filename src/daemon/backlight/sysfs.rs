@@ -33,7 +33,7 @@ impl Backlight for Sysfs {
         }
     }
 
-    fn set_brightness(&self, level: i32) -> Result<(), Box<dyn Error>> {
+    fn set_brightness(&self, level: i32) -> Result<i32, Box<dyn Error>> {
         let mut level = level;
         let max_brightness = self.brightness_max()?;
 
@@ -45,7 +45,7 @@ impl Backlight for Sysfs {
         self.device_write("brightness", level.to_string().as_bytes())
             .unwrap();
 
-        Ok(())
+        Ok(level)
     }
 
     fn brightness(&self) -> Result<i32, Box<dyn Error>> {

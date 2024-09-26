@@ -1,21 +1,29 @@
-use std::{io::prelude::*, os::unix::net::{UnixListener, UnixStream}, path::Path};
+use std::fs::Permissions;
+use std::io::{Read, Write};
+use std::path::Path;
+
+use std::os::unix::fs::PermissionsExt;
+use std::os::unix::net::{UnixListener, UnixStream};
 
 use crate::backlight::{Backlight, Sysfs};
 
 use blctl_shared::{Request, Response};
 
 pub struct Daemon {
-    listener: UnixListener
-    // backlight: Box<dyn Backlight>
+    listener: UnixListener,
+    backlight: Box<dyn Backlight>
 }
 
 impl Daemon {
     pub fn new(path: &Path) -> Self {
+        let backlight = Box::new(Sysfs::new()
+            .expect("unable to create sysfs backlight interface"));
+
         if path.exists() {
-            // Socket file exists, try to delete so we can bind
-            println!("Warning: socket already exists - trying to delete");
+            println!("Removing old socket");
+
             std::fs::remove_file(path)
-                .expect("unable to remove daemon socket (is it still in use?)");
+                .expect("unable to remove unused socket");
         }
 
         let listener = UnixListener::bind(path)
@@ -23,8 +31,14 @@ impl Daemon {
 
         println!("Bound to daemon socket");
 
+        std::fs::set_permissions(path, Permissions::from_mode(0o666))
+            .expect("failed to set socket permissions");
+
+        println!("Set socket file permissions to 666");
+
         Self {
-            listener
+            listener,
+            backlight
         }
     }
 
@@ -78,14 +92,45 @@ impl Daemon {
     fn process_response(&self, mut client_stream: &UnixStream, request: Request) {
         println!("Processing response");
 
+        // Todo: Handle backlight brightness value mapping
+
         let response = match request {
-            Request::Set { level, raw } => Response::Success { level, raw },
-            Request::Increase { amount, raw } => Response::Success { level: amount, raw },
-            Request::Decrease { amount, raw } => Response::Success { level: amount, raw },
-            Request::Get { raw } => Response::Success { level: 100, raw },
-            Request::GetMax => Response::Success { level: 100, raw: true },
-            Request::Store => Response::Success { level: 100, raw: false },
-            Request::Restore => Response::Success { level: 100, raw: false },
+            Request::Set { level, raw } => {
+                self.backlight.set_brightness(level)
+            },
+            Request::Increase { amount, raw } => {
+                match self.backlight.brightness() {
+                    Ok(brightness) => {
+                        self.backlight.set_brightness(brightness + amount)
+                    }
+                    Err(err) => Err(err)
+                }
+            },
+            Request::Decrease { amount, raw } => {
+                match self.backlight.brightness() {
+                    Ok(brightness) => {
+                        self.backlight.set_brightness(brightness - amount)
+                    }
+                    Err(err) => Err(err)
+                }
+            },
+            Request::Get { raw } => {
+                self.backlight.brightness()
+            },
+            Request::GetMax => {
+                self.backlight.brightness_max()
+            },
+            Request::Store => {
+                todo!()
+            },
+            Request::Restore => {
+                todo!()
+            },
+        };
+
+        let response = match response {
+            Ok(level) => Response::Success { level, raw: true },
+            Err(err) => Response::Failure { reason: err.to_string() }
         };
 
         let response_data = bincode::serialize(&response).unwrap();

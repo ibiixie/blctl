@@ -17,7 +17,7 @@ pub trait Backlight {
     ///
     /// # Errors
     /// N/A
-    fn set_brightness(&self, level: i32) -> Result<(), Box<dyn Error>>;
+    fn set_brightness(&self, level: i32) -> Result<i32, Box<dyn Error>>;
 
     /// Returns the backlight brightness in percent.
     ///

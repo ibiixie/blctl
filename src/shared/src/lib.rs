@@ -1,6 +1,8 @@
 use clap::Subcommand;
 use serde::{Deserialize, Serialize};
 
+pub const IPC_SOCKET_FILE_PATH: &str = "/tmp/blctld.sock";
+
 #[derive(Subcommand, Deserialize, Serialize, Clone, Copy, Debug)]
 pub enum Request {
     /// Set backlight brightness to the specified level
