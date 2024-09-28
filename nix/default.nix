@@ -8,7 +8,7 @@ in
     pname = manifest.name;
     version = manifest.version;
 
-    src = fetchFromGitHub {
+    src = pkgs.fetchFromGitHub {
       owner = "imxela";
       repo = "blctl";
       rev = "d6be5431e6631a4e8c3ca4c6ae151368f2cddb40";
