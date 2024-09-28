@@ -12,7 +12,8 @@
     pkgsFor = forAllSystems (system: nixpkgs.legacyPackages.${system});
   in {
     packages = forAllSystems (system: {
-      default = pkgsFor.${system}.callPackage ./nix/default.nix { };
+      blctl = pkgsFor.${system}.callPackage ./nix/default.nix { };
+      default = self.packages.${system}.blctl;
     });
     devShells = forAllSystems (system: {
       default = pkgsFor.${system}.callPackage ./nix/shell.nix { };
