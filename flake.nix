@@ -10,12 +10,10 @@
     supportedSystems = [ "x86_64-linux" ];
     forAllSystems = nixpkgs.lib.genAttrs supportedSystems;
     pkgsFor = nixpkgs.legacyPackages;
-
-    blctl = pkgsFor.${system}.callPackage ./nix/default.nix { };
   in {
     packages = forAllSystems (system: {
-      inherit blctl;
-      default = blctl;
+      default = pkgsFor.${system}.callPackage ./nix/default.nix { };
+      blctl = pkgsFor.${system}.callPackage ./nix/default.nix { };
     });
     devShells = forAllSystems (system: {
       default = pkgsFor.${system}.callPackage ./nix/shell.nix { };
