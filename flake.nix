@@ -9,11 +9,11 @@
   let
     supportedSystems = [ "x86_64-linux" ];
     forAllSystems = nixpkgs.lib.genAttrs supportedSystems;
-    pkgsFor = forAllSystems (system: nixpkgs.legacyPackages.${system});
+    pkgsFor = forAllSystems (system: import nixpkgs { inherit system; });
   in {
     packages = forAllSystems (system: {
-      blctl = pkgsFor.${system}.callPackage ./nix/default.nix { };
-      default = self.packages.${system}.blctl;
+      # blctl = pkgsFor.${system}.callPackage ./nix/default.nix { };
+      default = pkgsFor.${system}.callPackage ./nix/default.nix { };
     });
     devShells = forAllSystems (system: {
       default = pkgsFor.${system}.callPackage ./nix/shell.nix { };
