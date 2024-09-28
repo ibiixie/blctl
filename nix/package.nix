@@ -1,5 +1,5 @@
 {
-  pkgs ? import <nixpkgs> { } 
+  pkgs ? import <nixpkgs> { }
 }:
 let
   manifest = (pkgs.lib.importTOML ../Cargo.toml).package;
@@ -19,7 +19,11 @@ in
       lockFile = ../Cargo.lock;
     };
 
-    # cargoDeps = pkgs.rustPlatform.importCargoLock {
-    #   lockFile = ../Cargo.lock;
-    # };
+    meta = with pkgs.lib; {
+      description = "A minimal backlight control daemon for Linux";
+      homepage = "https://github.com/imxela/blctl";
+      license = with licenses; [ asl20 mit ];
+      maintainers = with maintainers; [ imxela ];
+      mainProgram = "blctl";
+    };
   }

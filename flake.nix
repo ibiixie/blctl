@@ -1,5 +1,5 @@
 {
-  description = "blctl";
+  description = "A minimal backlight control daemon for Linux";
 
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";

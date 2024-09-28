@@ -1,7 +1,7 @@
 { pkgs ? import <nixpkgs> { } }:
 
 pkgs.mkShell {
-  inputsFrom = [ (pkgs.callPackage ./default.nix { }) ];
+  inputsFrom = [ (pkgs.callPackage ./package.nix { }) ];
 
   buildInputs = with pkgs; [
     rust-analyzer
