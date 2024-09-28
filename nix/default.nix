@@ -11,7 +11,7 @@ in
     src = pkgs.lib.fetchFromGitHub {
       owner = "imxela";
       repo = "blctl";
-      rev = "";
+      rev = "d6be5431e6631a4e8c3ca4c6ae151368f2cddb40";
       sha256 = pkgs.lib.fakeHash;
     };
 
