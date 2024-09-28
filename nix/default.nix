@@ -19,7 +19,7 @@ in
       lockFile = ../Cargo.lock;
     };
 
-    cargoDeps = pkkgs.rustPlatform.importCargoLock {
+    cargoDeps = pkgs.rustPlatform.importCargoLock {
       lockFile = ../Cargo.lock;
     };
   }
