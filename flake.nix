@@ -15,7 +15,7 @@
   in {
     packages = forAllSystems (system: {
       inherit blctl;
-      default = blctl;;
+      default = blctl;
     });
     devShells = forAllSystems (system: {
       default = pkgsFor.${system}.callPackage ./nix/shell.nix { };
