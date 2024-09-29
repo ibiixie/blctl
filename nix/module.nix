@@ -6,26 +6,24 @@
 }: let
   
 in {
-  options = {
-    services.blctl = {
-      enable = lib.mkEnableOption "Whether to enable the blctl daemon";
+  options.services.blctl = {
+    enable = lib.mkEnableOption "Whether to enable the blctl daemon";
 
-      package = lib.mkOption {
-        type = lib.types.package;
-        default = pkgs.blctl;
-      };
+    package = lib.mkOption {
+      type = lib.types.package;
+      default = pkgs.callPackage ./package.nix;
+    };
 
-      restore = lib.mkOption {
-        type = lib.types.bool;
-        default = false;
-        description = "Whether to enable the blctl store/restore procedure";
-      };
+    restore = lib.mkOption {
+      type = lib.types.bool;
+      default = false;
+      description = "Whether to enable the blctl store/restore procedure";
     };
   };
 
   config = lib.mkIf config.services.blctl.enable {
     # Install the binaries (bin/blctl and sbin/blctld)
-    environment.systemPackages = [ pkgs.blctl ];
+    environment.systemPackages = [ config.services.blctl.package ];
     
     # Create a systemd service for bin/blctld
     systemd = {
