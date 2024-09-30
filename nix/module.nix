@@ -22,14 +22,12 @@ in {
   };
 
   config = lib.mkIf config.services.blctl.enable {
-    # Install the binaries (bin/blctl and sbin/blctld)
     environment.systemPackages = [ config.services.blctl.package ];
     
-    # Create a systemd service for bin/blctld
     systemd = {
       services.blctl = {
 	      serviceConfig = {
-          ExecStart = "${config.services.blctl.package}/sbin/blctld";
+          ExecStart = "${config.services.blctl.package}/bin/blctld";
 	      };
         wantedBy = [ "multi-user.target" ];
       };
