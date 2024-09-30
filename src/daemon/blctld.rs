@@ -24,6 +24,8 @@ impl Daemon {
 
             std::fs::remove_file(path)
                 .expect("unable to remove unused socket");
+        } else {
+            std::fs::create_dir_all(path.parent().unwrap()).unwrap();
         }
 
         let listener = UnixListener::bind(path)
