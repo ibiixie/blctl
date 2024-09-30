@@ -37,10 +37,8 @@ impl Backlight for Sysfs {
         let mut level = level;
         let max_brightness = self.brightness_max()?;
 
-        // Clamp to maximum allowed value as defined by the backlight device
-        if level > max_brightness {
-            level = max_brightness;
-        }
+        // Clamp brightness to be within the allowed bounds
+        level = level.clamp(0, max_brightness);
 
         self.device_write("brightness", level.to_string().as_bytes())
             .unwrap();

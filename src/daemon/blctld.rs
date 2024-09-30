@@ -1,3 +1,4 @@
+use std::error::Error;
 use std::fs::Permissions;
 use std::io::{Read, Write};
 use std::path::Path;
@@ -98,12 +99,24 @@ impl Daemon {
 
         let response = match request {
             Request::Set { level, raw } => {
-                self.backlight.set_brightness(level)
+                let new_brightness = if raw {
+                    Ok(level)
+                } else {
+                    self.map_brightness_level(level)
+                };
+
+                self.backlight.set_brightness(new_brightness.unwrap())
             },
             Request::Increase { amount, raw } => {
                 match self.backlight.brightness() {
                     Ok(brightness) => {
-                        self.backlight.set_brightness(brightness + amount)
+                        let new_brightness = if raw {
+                            Ok(brightness + amount)
+                        } else {
+                            self.map_brightness_level(brightness + amount)
+                        };
+
+                        self.backlight.set_brightness(new_brightness.unwrap())
                     }
                     Err(err) => Err(err)
                 }
@@ -111,13 +124,26 @@ impl Daemon {
             Request::Decrease { amount, raw } => {
                 match self.backlight.brightness() {
                     Ok(brightness) => {
-                        self.backlight.set_brightness(brightness - amount)
+                        let new_brightness = if raw {
+                            Ok(brightness - amount)
+                        } else {
+                            self.map_brightness_level(brightness - amount)
+                        };
+
+                        self.backlight.set_brightness(new_brightness.unwrap())
                     }
                     Err(err) => Err(err)
                 }
             },
             Request::Get { raw } => {
-                self.backlight.brightness()
+                if raw {
+                    self.backlight.brightness()
+                } else {
+                    match self.backlight.brightness() {
+                        Ok(brightness) => self.map_brightness_level(brightness),
+                        Err(err) => Err(err)
+                    }
+                }
             },
             Request::GetMax => {
                 self.backlight.brightness_max()
@@ -144,5 +170,16 @@ impl Daemon {
             .expect("error while writing response data to client connection");
 
         println!("Response sent to client");
+    }
+
+    /// Maps the specified brightness to a range between 0 and 100 inclusive.
+    fn map_brightness_level(&self, brightness: i32) -> Result<i32, Box<dyn Error>> {
+        let max = self.backlight.brightness_max()?;
+        Ok(Self::map_range(brightness, 0, max, 0, 100))
+    }
+
+    /// Maps an i32 to be within the specified range.
+    fn map_range(input: i32, input_start: i32, input_end: i32, output_start: i32, output_end: i32) -> i32 {
+        return output_end - (((output_end - output_start) * (input - input_start)) / (input_end - input_start));
     }
 }
