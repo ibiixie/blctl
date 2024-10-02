@@ -3,7 +3,7 @@
 }:
 let
   manifest = (pkgs.lib.importTOML ../Cargo.toml).package;
-in 
+in
   pkgs.rustPlatform.buildRustPackage rec {
     pname = manifest.name;
     version = manifest.version;
@@ -11,8 +11,8 @@ in
     src = pkgs.fetchFromGitHub {
       owner = "imxela";
       repo = "blctl";
-      rev = "d6be5431e6631a4e8c3ca4c6ae151368f2cddb40";
-      sha256 = "sha256-O9kItZr93sDHWJ8sEy6ANkJQZqnxWTS/1fIveX/2NEE=";
+      rev = "028638a99b68cb068ae7a446e662712eb1cec713";
+      sha256 = "sha256-LMAICQrChwsWWmM633w21VFY2lf5gFFJ07C3fwp638I=";
     };
 
     cargoLock = {
