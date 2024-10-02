@@ -9,6 +9,8 @@ use blctl::{Blctl, CliArgs};
 mod ipc;
 
 fn main() -> Result<(), String> {
+    println!("Client init v1.0.0-alpha");
+
     let args = CliArgs::parse();
     Blctl::new(args.verbose).run(args.request())
 }

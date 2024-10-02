@@ -10,7 +10,7 @@ use blctld::Daemon;
 use blctl_shared::IPC_SOCKET_FILE_PATH;
 
 fn main() {
-    println!("Daemon init");
+    println!("Daemon init v1.0.0-alpha");
 
     let daemon = Daemon::new(Path::new(IPC_SOCKET_FILE_PATH));
     daemon.listen();
