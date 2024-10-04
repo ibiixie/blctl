@@ -133,7 +133,7 @@ impl Daemon {
                     level
                 } else {
                     self.map_brightness_level(level)?
-                };
+                }.clamp(0, self.backlight.brightness_max()?);
 
                 Ok(self.backlight.set_brightness(new_brightness)?)
             }
@@ -142,9 +142,8 @@ impl Daemon {
                 let new_brightness = if raw {
                     brightness + amount
                 } else {
-                    // Fix: brightness is raw, amount is not! this conversion wont work!
                     brightness + self.map_brightness_level(amount)?
-                };
+                }.clamp(0, self.backlight.brightness_max()?);
 
                 Ok(self.backlight.set_brightness(new_brightness)?)
             },
@@ -154,17 +153,17 @@ impl Daemon {
                     brightness - amount
                 } else {
                     brightness - self.map_brightness_level(amount)?
-                };
+                }.clamp(0, self.backlight.brightness_max()?);
 
                 Ok(self.backlight.set_brightness(new_brightness)?)
             },
             Request::Get { raw } => {
-                if raw {
-                    Ok(self.backlight.brightness()?)
+                Ok(if raw {
+                    self.backlight.brightness()?
                 } else {
                     let brightness = self.backlight.brightness()?;
-                    Ok(self.map_brightness_level(brightness)?)
-                }
+                    self.map_brightness_level(brightness)?
+                })
             }
             Request::GetMax => Ok(self.backlight.brightness_max()?),
             Request::Store => {
@@ -190,14 +189,6 @@ impl Daemon {
         output_start: i32,
         output_end: i32,
     ) -> i32 {
-        let input = input.clamp(input_start, input_end);
-        let output = output_end
-            + (((output_end - output_start) * (input - input_end)) / (input_end - input_start));
-
-        let output = output.clamp(output_start, output_end);
-
-        println!("OUTPUT: {output}");
-
-        return output;
+        return output_end + (((output_end - output_start) * (input - input_end)) / (input_end - input_start));
     }
 }
