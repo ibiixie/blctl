@@ -16,12 +16,13 @@ pub struct Daemon {
 }
 
 impl Daemon {
+    /// Create and initialize a new daemon socket instance.
     pub fn new(path: &Path) -> Self {
-        let backlight = Box::new(Sysfs::new().expect("unable to create sysfs backlight interface"));
+        let backlight = Box::new(Sysfs::new()
+            .expect("unable to create sysfs backlight interface"));
 
         if path.exists() {
-            println!("Removing old socket");
-
+            println!("Removing previous socket");
             std::fs::remove_file(path).unwrap();
         } else {
             std::fs::create_dir_all(path.parent().unwrap()).unwrap();
@@ -29,12 +30,12 @@ impl Daemon {
 
         let listener = UnixListener::bind(path).unwrap();
 
-        println!("Bound to daemon socket");
+        println!("Bound to socket");
 
         std::fs::set_permissions(path, Permissions::from_mode(0o666))
             .unwrap();
 
-        println!("Set socket file permissions to 666");
+        println!("Set socket file permissions");
 
         Self {
             listener,
@@ -42,13 +43,14 @@ impl Daemon {
         }
     }
 
+    /// Blockingly listen for incoming client connections and handle them.
     pub fn listen(&self) {
-        println!("Awaiting client requests");
+        println!("Awaiting socket connections");
 
         for stream in self.listener.incoming() {
             match stream {
                 Ok(stream) => {
-                    println!("Connection accepted");
+                    println!("Client connected to socket");
                     match self.handle_client(&stream) {
                         Ok(_) => (),
                         Err(err) => eprintln!("Failed to handle client request: {}", err)
@@ -62,7 +64,7 @@ impl Daemon {
         }
     }
 
-    // Todo: Make async?
+    /// Handle the client.
     fn handle_client(&self, client_stream: &UnixStream) -> Result<(), Box<dyn Error>> {
         println!("Handling client");
 
@@ -78,8 +80,9 @@ impl Daemon {
         Ok(())
     }
 
+    /// Read a request from the given client stream.
     fn read_request(&self, mut client_stream: &UnixStream) -> Result<Request, Box<dyn Error>> {
-        println!("Processing request");
+        println!("Reading request");
 
         let mut request_size = [0u8; std::mem::size_of::<usize>()];
         client_stream
@@ -95,14 +98,15 @@ impl Daemon {
 
         let request = bincode::deserialize::<Request>(&request_data)?;
 
-        println!("Request received from client");
+        println!("Request received");
         dbg!(&request);
 
         Ok(request)
     }
 
+    /// Send the specified response to the given client stream.
     fn send_response(&self, mut client_stream: &UnixStream, response: Response) -> Result<(), Box<dyn Error>> {
-        println!("Processing response");
+        println!("Sending response");
 
         let response_data = bincode::serialize(&response)?;
         println!("Response data size is {} bytes", response_data.len());
@@ -113,7 +117,7 @@ impl Daemon {
         client_stream
             .write_all(&response_data)?;
 
-        println!("Response sent to client");
+        println!("Response sent");
 
         dbg!(response);
 
@@ -121,6 +125,8 @@ impl Daemon {
     }
 
     fn handle_request(&self, request: Request) -> Result<i32, Box<dyn Error>> {
+        println!("Handling request");
+
         match request {
             Request::Set { level, raw } => {
                 let new_brightness = if raw {
