@@ -22,17 +22,17 @@ impl Daemon {
         if path.exists() {
             println!("Removing old socket");
 
-            std::fs::remove_file(path).expect("unable to remove unused socket");
+            std::fs::remove_file(path).unwrap();
         } else {
             std::fs::create_dir_all(path.parent().unwrap()).unwrap();
         }
 
-        let listener = UnixListener::bind(path).expect("unable to bind to daemon socket");
+        let listener = UnixListener::bind(path).unwrap();
 
         println!("Bound to daemon socket");
 
         std::fs::set_permissions(path, Permissions::from_mode(0o666))
-            .expect("failed to set socket permissions");
+            .unwrap();
 
         println!("Set socket file permissions to 666");
 
@@ -43,36 +43,47 @@ impl Daemon {
     }
 
     pub fn listen(&self) {
-        println!("Awaiting connections");
+        println!("Awaiting client requests");
 
         for stream in self.listener.incoming() {
             match stream {
                 Ok(stream) => {
                     println!("Connection accepted");
-                    self.handle_client(&stream);
+                    match self.handle_client(&stream) {
+                        Ok(_) => (),
+                        Err(err) => eprintln!("Failed to handle client request: {}", err)
+                    }
                 }
                 Err(err) => {
-                    println!("Unable to accept client connection - skipping: {err}");
+                    println!("Failed to accept incoming connection: {err}");
                     continue;
                 }
             }
         }
     }
 
-    fn handle_client(&self, client_stream: &UnixStream) {
+    // Todo: Make async?
+    fn handle_client(&self, client_stream: &UnixStream) -> Result<(), Box<dyn Error>> {
         println!("Handling client");
 
-        let request = self.process_request(client_stream);
-        self.process_response(client_stream, request);
+        let request = self.read_request(client_stream)?;
+
+        let response = match self.handle_request(request) {
+            Ok(level) => Response::Success { level , raw: true },
+            Err(err) => Response::Failure { reason: err.to_string() }
+        };
+
+        self.send_response(client_stream, response)?;
+
+        Ok(())
     }
 
-    fn process_request(&self, mut client_stream: &UnixStream) -> Request {
+    fn read_request(&self, mut client_stream: &UnixStream) -> Result<Request, Box<dyn Error>> {
         println!("Processing request");
 
         let mut request_size = [0u8; std::mem::size_of::<usize>()];
         client_stream
-            .read_exact(&mut request_size)
-            .expect("error while reading response header from client connection");
+            .read_exact(&mut request_size)?;
 
         let request_size = usize::from_ne_bytes(request_size);
 
@@ -80,91 +91,83 @@ impl Daemon {
 
         let mut request_data = vec![0u8; request_size];
         client_stream
-            .read_exact(&mut request_data)
-            .expect("error while reading request data from client connection");
+            .read_exact(&mut request_data)?;
 
-        let request = bincode::deserialize::<Request>(&request_data).unwrap();
+        let request = bincode::deserialize::<Request>(&request_data)?;
 
         println!("Request received from client");
         dbg!(&request);
 
-        request
+        Ok(request)
     }
 
-    fn process_response(&self, mut client_stream: &UnixStream, request: Request) {
+    fn send_response(&self, mut client_stream: &UnixStream, response: Response) -> Result<(), Box<dyn Error>> {
         println!("Processing response");
 
-        let response = match request {
+        let response_data = bincode::serialize(&response)?;
+        println!("Response data size is {} bytes", response_data.len());
+
+        client_stream
+            .write_all(&response_data.len().to_ne_bytes())?;
+
+        client_stream
+            .write_all(&response_data)?;
+
+        println!("Response sent to client");
+
+        dbg!(response);
+
+        Ok(())
+    }
+
+    fn handle_request(&self, request: Request) -> Result<i32, Box<dyn Error>> {
+        match request {
             Request::Set { level, raw } => {
                 let new_brightness = if raw {
-                    Ok(level)
+                    level
                 } else {
-                    self.map_brightness_level(level)
+                    self.map_brightness_level(level)?
                 };
 
-                self.backlight.set_brightness(new_brightness.unwrap())
+                Ok(self.backlight.set_brightness(new_brightness)?)
             }
-            Request::Increase { amount, raw } => match self.backlight.brightness() {
-                Ok(brightness) => {
-                    let new_brightness = if raw {
-                        Ok(brightness + amount)
-                    } else {
-                        self.map_brightness_level(brightness + amount)
-                    };
+            Request::Increase { amount, raw } => {
+                let brightness = self.backlight.brightness()?;
+                let new_brightness = if raw {
+                    brightness + amount
+                } else {
+                    // Fix: brightness is raw, amount is not! this conversion wont work!
+                    brightness + self.map_brightness_level(amount)?
+                };
 
-                    self.backlight.set_brightness(new_brightness.unwrap())
-                }
-                Err(err) => Err(err),
+                Ok(self.backlight.set_brightness(new_brightness)?)
             },
-            Request::Decrease { amount, raw } => match self.backlight.brightness() {
-                Ok(brightness) => {
-                    let new_brightness = if raw {
-                        Ok(brightness - amount)
-                    } else {
-                        self.map_brightness_level(brightness - amount)
-                    };
+            Request::Decrease { amount, raw } => {
+                let brightness = self.backlight.brightness()?;
+                let new_brightness = if raw {
+                    brightness - amount
+                } else {
+                    brightness - self.map_brightness_level(amount)?
+                };
 
-                    self.backlight.set_brightness(new_brightness.unwrap())
-                }
-                Err(err) => Err(err),
+                Ok(self.backlight.set_brightness(new_brightness)?)
             },
             Request::Get { raw } => {
                 if raw {
-                    self.backlight.brightness()
+                    Ok(self.backlight.brightness()?)
                 } else {
-                    match self.backlight.brightness() {
-                        Ok(brightness) => self.map_brightness_level(brightness),
-                        Err(err) => Err(err),
-                    }
+                    let brightness = self.backlight.brightness()?;
+                    Ok(self.map_brightness_level(brightness)?)
                 }
             }
-            Request::GetMax => self.backlight.brightness_max(),
+            Request::GetMax => Ok(self.backlight.brightness_max()?),
             Request::Store => {
                 todo!()
             }
             Request::Restore => {
                 todo!()
             }
-        };
-
-        let response = match response {
-            Ok(level) => Response::Success { level, raw: true },
-            Err(err) => Response::Failure {
-                reason: err.to_string(),
-            },
-        };
-
-        let response_data = bincode::serialize(&response).unwrap();
-        println!("Response data size is {} bytes", response_data.len());
-
-        client_stream
-            .write_all(&response_data.len().to_ne_bytes())
-            .expect("error while writing response header to client connection");
-        client_stream
-            .write_all(&response_data)
-            .expect("error while writing response data to client connection");
-
-        println!("Response sent to client");
+        }
     }
 
     /// Maps the specified brightness to a range between 0 and 100 inclusive.
@@ -181,7 +184,14 @@ impl Daemon {
         output_start: i32,
         output_end: i32,
     ) -> i32 {
-        return output_end
+        let input = input.clamp(input_start, input_end);
+        let output = output_end
             + (((output_end - output_start) * (input - input_end)) / (input_end - input_start));
+
+        let output = output.clamp(output_start, output_end);
+
+        println!("OUTPUT: {output}");
+
+        return output;
     }
 }
