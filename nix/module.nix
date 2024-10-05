@@ -13,12 +13,6 @@ in {
       type = lib.types.package;
       default = pkgs.callPackage ./package.nix { };
     };
-
-    restore = lib.mkOption {
-      type = lib.types.bool;
-      default = false;
-      description = "Whether to enable the blctl store/restore procedure";
-    };
   };
 
   config = lib.mkIf config.services.blctl.enable {
