@@ -39,10 +39,6 @@ impl Client {
             .read_exact(&mut response_data)
             .expect("error while reading response data from daemon socket");
 
-        let response = bincode::deserialize::<Response>(&response_data).unwrap();
-
-        dbg!(&response);
-
-        response
+        bincode::deserialize::<Response>(&response_data).unwrap()
     }
 }
