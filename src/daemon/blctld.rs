@@ -160,10 +160,10 @@ impl Daemon {
                 Ok(self.backlight.set_brightness(new_brightness)?)
             }
             Request::Get { raw } => Ok(if raw {
-                self.backlight.brightness()?
-            } else {
                 let brightness = self.backlight.brightness()?;
                 self.map_brightness_level(brightness)?
+            } else {
+                self.backlight.brightness()?
             }),
             Request::GetMax => Ok(self.backlight.brightness_max()?),
         }
