@@ -53,12 +53,6 @@ pub enum Request {
     /// Return the maximum supported backlight brightness level as defined
     /// by the backlight device driver
     GetMax,
-
-    /// Store the current backlight brightness level on disk
-    Store,
-
-    /// Set backlight brightness to the previously stored value
-    Restore,
 }
 
 #[derive(Clone, Deserialize, Serialize, Debug)]

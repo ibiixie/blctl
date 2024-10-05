@@ -89,7 +89,6 @@ impl Daemon {
         client_stream.read_exact(&mut request_size)?;
 
         let request_size = usize::from_ne_bytes(request_size);
-
         println!("Request data size is {request_size} bytes");
 
         let mut request_data = vec![0u8; request_size];
@@ -116,11 +115,9 @@ impl Daemon {
         println!("Response data size is {} bytes", response_data.len());
 
         client_stream.write_all(&response_data.len().to_ne_bytes())?;
-
         client_stream.write_all(&response_data)?;
 
         println!("Response sent");
-
         dbg!(response);
 
         Ok(())
@@ -169,12 +166,6 @@ impl Daemon {
                 self.map_brightness_level(brightness)?
             }),
             Request::GetMax => Ok(self.backlight.brightness_max()?),
-            Request::Store => {
-                todo!()
-            }
-            Request::Restore => {
-                todo!()
-            }
         }
     }
 
