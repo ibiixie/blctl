@@ -18,8 +18,7 @@ pub struct Daemon {
 impl Daemon {
     /// Create and initialize a new daemon socket instance.
     pub fn new(path: &Path) -> Self {
-        let backlight = Box::new(Sysfs::new()
-            .expect("unable to create sysfs backlight interface"));
+        let backlight = Box::new(Sysfs::new().expect("unable to create sysfs backlight interface"));
 
         if path.exists() {
             println!("Removing previous socket");
@@ -32,8 +31,7 @@ impl Daemon {
 
         println!("Bound to socket");
 
-        std::fs::set_permissions(path, Permissions::from_mode(0o666))
-            .unwrap();
+        std::fs::set_permissions(path, Permissions::from_mode(0o666)).unwrap();
 
         println!("Set socket file permissions");
 
@@ -52,8 +50,8 @@ impl Daemon {
                 Ok(stream) => {
                     println!("Client connected to socket");
                     match self.handle_client(&stream) {
-                        Ok(_) => (),
-                        Err(err) => eprintln!("Failed to handle client request: {}", err)
+                        Ok(()) => println!("Client request completed"),
+                        Err(err) => eprintln!("Failed to handle client request: {err}"),
                     }
                 }
                 Err(err) => {
@@ -71,8 +69,10 @@ impl Daemon {
         let request = self.read_request(client_stream)?;
 
         let response = match self.handle_request(request) {
-            Ok(level) => Response::Success { level , raw: true },
-            Err(err) => Response::Failure { reason: err.to_string() }
+            Ok(level) => Response::Success { level, raw: true },
+            Err(err) => Response::Failure {
+                reason: err.to_string(),
+            },
         };
 
         self.send_response(client_stream, response)?;
@@ -81,20 +81,19 @@ impl Daemon {
     }
 
     /// Read a request from the given client stream.
+    #[allow(clippy::unused_self)]
     fn read_request(&self, mut client_stream: &UnixStream) -> Result<Request, Box<dyn Error>> {
         println!("Reading request");
 
         let mut request_size = [0u8; std::mem::size_of::<usize>()];
-        client_stream
-            .read_exact(&mut request_size)?;
+        client_stream.read_exact(&mut request_size)?;
 
         let request_size = usize::from_ne_bytes(request_size);
 
         println!("Request data size is {request_size} bytes");
 
         let mut request_data = vec![0u8; request_size];
-        client_stream
-            .read_exact(&mut request_data)?;
+        client_stream.read_exact(&mut request_data)?;
 
         let request = bincode::deserialize::<Request>(&request_data)?;
 
@@ -105,17 +104,20 @@ impl Daemon {
     }
 
     /// Send the specified response to the given client stream.
-    fn send_response(&self, mut client_stream: &UnixStream, response: Response) -> Result<(), Box<dyn Error>> {
+    #[allow(clippy::unused_self)]
+    fn send_response(
+        &self,
+        mut client_stream: &UnixStream,
+        response: Response,
+    ) -> Result<(), Box<dyn Error>> {
         println!("Sending response");
 
         let response_data = bincode::serialize(&response)?;
         println!("Response data size is {} bytes", response_data.len());
 
-        client_stream
-            .write_all(&response_data.len().to_ne_bytes())?;
+        client_stream.write_all(&response_data.len().to_ne_bytes())?;
 
-        client_stream
-            .write_all(&response_data)?;
+        client_stream.write_all(&response_data)?;
 
         println!("Response sent");
 
@@ -133,7 +135,8 @@ impl Daemon {
                     level
                 } else {
                     self.map_brightness_level(level)?
-                }.clamp(0, self.backlight.brightness_max()?);
+                }
+                .clamp(0, self.backlight.brightness_max()?);
 
                 Ok(self.backlight.set_brightness(new_brightness)?)
             }
@@ -143,28 +146,28 @@ impl Daemon {
                     brightness + amount
                 } else {
                     brightness + self.map_brightness_level(amount)?
-                }.clamp(0, self.backlight.brightness_max()?);
+                }
+                .clamp(0, self.backlight.brightness_max()?);
 
                 Ok(self.backlight.set_brightness(new_brightness)?)
-            },
+            }
             Request::Decrease { amount, raw } => {
                 let brightness = self.backlight.brightness()?;
                 let new_brightness = if raw {
                     brightness - amount
                 } else {
                     brightness - self.map_brightness_level(amount)?
-                }.clamp(0, self.backlight.brightness_max()?);
+                }
+                .clamp(0, self.backlight.brightness_max()?);
 
                 Ok(self.backlight.set_brightness(new_brightness)?)
-            },
-            Request::Get { raw } => {
-                Ok(if raw {
-                    self.backlight.brightness()?
-                } else {
-                    let brightness = self.backlight.brightness()?;
-                    self.map_brightness_level(brightness)?
-                })
             }
+            Request::Get { raw } => Ok(if raw {
+                self.backlight.brightness()?
+            } else {
+                let brightness = self.backlight.brightness()?;
+                self.map_brightness_level(brightness)?
+            }),
             Request::GetMax => Ok(self.backlight.brightness_max()?),
             Request::Store => {
                 todo!()
@@ -189,6 +192,7 @@ impl Daemon {
         output_start: i32,
         output_end: i32,
     ) -> i32 {
-        return output_end + (((output_end - output_start) * (input - input_end)) / (input_end - input_start));
+        output_end
+            + (((output_end - output_start) * (input - input_end)) / (input_end - input_start))
     }
 }

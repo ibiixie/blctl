@@ -2,8 +2,8 @@ use std::path::Path;
 
 use clap::Parser;
 
-use crate::ipc::IpcClient;
-use blctl_shared::*;
+use crate::ipc::Client;
+use blctl_shared::{Request, Response, IPC_SOCKET_FILE_PATH};
 
 #[derive(Parser)]
 #[command(arg_required_else_help = true)]
@@ -11,31 +11,26 @@ use blctl_shared::*;
 pub struct CliArgs {
     #[command(subcommand)]
     pub command: Option<Request>,
-
-    /// Print detailed debugging output to stdout
-    #[arg(long, short)]
-    pub verbose: bool,
 }
 
 impl CliArgs {
     #[must_use]
     pub fn request(&self) -> Request {
-        self.command.clone().unwrap()
+        self.command.unwrap()
     }
 }
 
-pub struct Blctl {
-    verbose: bool,
-}
+pub struct Blctl;
 
 impl Blctl {
-    pub fn new(verbose: bool) -> Self {
-        Self { verbose }
+    pub fn new() -> Self {
+        Self {}
     }
 
     /// Run the specified command/request
+    #[allow(clippy::unused_self)]
     pub fn run(&self, request: Request) -> Result<(), String> {
-        let mut ipc_client = IpcClient::new(Path::new(IPC_SOCKET_FILE_PATH));
+        let mut ipc_client = Client::new(Path::new(IPC_SOCKET_FILE_PATH));
         let response = ipc_client.request(request);
 
         match response {

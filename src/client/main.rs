@@ -10,5 +10,5 @@ mod ipc;
 
 fn main() -> Result<(), String> {
     let args = CliArgs::parse();
-    Blctl::new(args.verbose).run(args.request())
+    Blctl::new().run(args.request())
 }
