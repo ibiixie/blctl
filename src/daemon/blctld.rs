@@ -75,7 +75,7 @@ impl Daemon {
             },
         };
 
-        self.send_response(client_stream, response)?;
+        self.send_response(client_stream, &response)?;
 
         Ok(())
     }
@@ -107,7 +107,7 @@ impl Daemon {
     fn send_response(
         &self,
         mut client_stream: &UnixStream,
-        response: Response,
+        response: &Response,
     ) -> Result<(), Box<dyn Error>> {
         println!("Sending response");
 
@@ -118,7 +118,7 @@ impl Daemon {
         client_stream.write_all(&response_data)?;
 
         println!("Response sent");
-        dbg!(response);
+        dbg!(&response);
 
         Ok(())
     }
