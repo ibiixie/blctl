@@ -132,8 +132,7 @@ impl Daemon {
                     level
                 } else {
                     self.map_brightness_level(level)?
-                }
-                .clamp(0, self.backlight.brightness_max()?);
+                };
 
                 Ok(self.backlight.set_brightness(new_brightness)?)
             }
@@ -143,8 +142,7 @@ impl Daemon {
                     brightness + amount
                 } else {
                     brightness + self.map_brightness_level(amount)?
-                }
-                .clamp(0, self.backlight.brightness_max()?);
+                };
 
                 Ok(self.backlight.set_brightness(new_brightness)?)
             }
@@ -154,8 +152,7 @@ impl Daemon {
                     brightness - amount
                 } else {
                     brightness - self.map_brightness_level(amount)?
-                }
-                .clamp(0, self.backlight.brightness_max()?);
+                };
 
                 Ok(self.backlight.set_brightness(new_brightness)?)
             }
@@ -171,8 +168,13 @@ impl Daemon {
 
     /// Maps the specified brightness to a range between 0 and 100 inclusive.
     fn map_brightness_level(&self, brightness: i32) -> Result<i32, Box<dyn Error>> {
-        let max = self.backlight.brightness_max()?;
-        Ok(Self::map_range(brightness, 0, 100, 0, max))
+        Ok(Self::map_range(
+            brightness,
+            0,
+            100,
+            0,
+            self.backlight.brightness_max()?,
+        ))
     }
 
     /// Maps an i32 to be within the specified range.
