@@ -131,7 +131,7 @@ impl Daemon {
                 let new_brightness = if raw {
                     level
                 } else {
-                    self.map_brightness_level(level)?
+                    self.map_percent_to_raw(level)?
                 };
 
                 Ok(self.backlight.set_brightness(new_brightness)?)
@@ -141,7 +141,7 @@ impl Daemon {
                 let new_brightness = if raw {
                     brightness + amount
                 } else {
-                    brightness + self.map_brightness_level(amount)?
+                    brightness + self.map_percent_to_raw(amount)?
                 };
 
                 Ok(self.backlight.set_brightness(new_brightness)?)
@@ -151,7 +151,7 @@ impl Daemon {
                 let new_brightness = if raw {
                     brightness - amount
                 } else {
-                    brightness - self.map_brightness_level(amount)?
+                    brightness - self.map_percent_to_raw(amount)?
                 };
 
                 Ok(self.backlight.set_brightness(new_brightness)?)
@@ -160,20 +160,29 @@ impl Daemon {
                 self.backlight.brightness()?
             } else {
                 let brightness = self.backlight.brightness()?;
-                self.map_brightness_level(brightness)?
+                self.map_raw_to_percent(brightness)?
             }),
             Request::GetMax => Ok(self.backlight.brightness_max()?),
         }
     }
 
-    /// Maps the specified brightness to a range between 0 and 100 inclusive.
-    fn map_brightness_level(&self, brightness: i32) -> Result<i32, Box<dyn Error>> {
+    fn map_percent_to_raw(&self, brightness_percent: i32) -> Result<i32, Box<dyn Error>> {
         Ok(Self::map_range(
-            brightness,
+            brightness_percent,
             0,
             100,
             0,
             self.backlight.brightness_max()?,
+        ))
+    }
+
+    fn map_raw_to_percent(&self, brightness_raw: i32) -> Result<i32, Box<dyn Error>> {
+        Ok(Self::map_range(
+            brightness_raw,
+            0,
+            self.backlight.brightness_max()?,
+            0,
+            100,
         ))
     }
 
