@@ -127,43 +127,43 @@ impl Daemon {
         println!("Handling request");
 
         match request {
-            Request::Set { level, raw } => {
-                if raw {
-                    Ok((self.backlight.set_brightness(level)?, raw))
+            Request::Set { level, from_raw, to_raw } => {
+                if from_raw {
+                    Ok((self.backlight.set_brightness(level)?, from_raw))
                 } else {
                     let mapped = self.map_percent_to_raw(level)?;
                     let result = self.backlight.set_brightness(mapped)?;
-                    Ok((self.map_raw_to_percent(result)?, raw))
+                    Ok((self.map_raw_to_percent(result)?, from_raw))
                 }
             }
-            Request::Increase { amount, raw } => {
+            Request::Increase { amount, from_raw, to_raw } => {
                 let brightness = self.backlight.brightness()?;
 
-                if raw {
-                    Ok((self.backlight.set_brightness(brightness + amount)?, raw))
+                if from_raw {
+                    Ok((self.backlight.set_brightness(brightness + amount)?, from_raw))
                 } else {
                     let mapped_amount = self.map_percent_to_raw(amount)?;
                     let result = self.backlight.set_brightness(brightness + mapped_amount)?;
-                    Ok((self.map_raw_to_percent(result)?, raw))
+                    Ok((self.map_raw_to_percent(result)?, from_raw))
                 }
             }
-            Request::Decrease { amount, raw } => {
+            Request::Decrease { amount, from_raw, to_raw } => {
                 let brightness = self.backlight.brightness()?;
 
-                if raw {
-                    Ok((self.backlight.set_brightness(brightness - amount)?, raw))
+                if from_raw {
+                    Ok((self.backlight.set_brightness(brightness - amount)?, from_raw))
                 } else {
                     let mapped_amount = self.map_percent_to_raw(amount)?;
                     let result = self.backlight.set_brightness(brightness - mapped_amount)?;
-                    Ok((self.map_raw_to_percent(result)?, raw))
+                    Ok((self.map_raw_to_percent(result)?, from_raw))
                 }
             }
-            Request::Get { raw } => {
-                if raw {
-                    Ok((self.backlight.brightness()?, raw))
+            Request::Get { to_raw } => {
+                if to_raw {
+                    Ok((self.backlight.brightness()?, to_raw))
                 } else {
                     let brightness = self.backlight.brightness()?;
-                    Ok((self.map_raw_to_percent(brightness)?, raw))
+                    Ok((self.map_raw_to_percent(brightness)?, to_raw))
                 }
             }
             Request::GetMax => Ok((self.backlight.brightness_max()?, true)),
