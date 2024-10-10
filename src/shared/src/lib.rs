@@ -23,15 +23,14 @@ pub enum Request {
     Increase {
         /// Desired brightness level to increase by between 0 and 100 inclusive (unless '--from-raw' is passed)
         amount: i32,
-        
+
         /// Interpret the specified brightness amount as a raw backlight value
         #[arg(short, long)]
         from_raw: bool,
-        
+
         /// Print the resulting brightness level as a raw backlight value
         #[arg(short, long)]
         to_raw: bool,
-
     },
 
     /// Decrease backlight brightness by the specified amount and print the resulting brightness level to stdout
