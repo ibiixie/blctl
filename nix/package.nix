@@ -19,16 +19,6 @@ in
       lockFile = ../Cargo.lock;
     };
 
-    /*
-    installPhase = ''
-      mkdir -p $out/bin
-      cp blctl $out/bin
-
-      mkdir -p $out/sbin
-      cp blctld $out/sbin
-    '';
-    */
-
     meta = with pkgs.lib; {
       description = "A minimal backlight control daemon for Linux";
       homepage = "https://github.com/imxela/blctl";
