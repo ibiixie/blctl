@@ -128,39 +128,34 @@ impl Daemon {
 
         match request {
             Request::Set {
-                level,
+                mut level,
                 from_raw,
                 to_raw,
             } => {
-                let mut result: i32;
-
-                if from_raw {
-                    result = self.backlight.set_brightness(level)?;
-                } else {
-                    let mapped = self.map_percent_to_raw(level)?;
-                    result = self.backlight.set_brightness(mapped)?;
+                if !from_raw {
+                    level = self.map_percent_to_raw(level)?;
                 }
 
-                if to_raw {
-                    result = self.map_percent_to_raw(result)?;
+                let mut result = self.backlight.set_brightness(level)?;
+
+                if !to_raw {
+                    result = self.map_raw_to_percent(result)?;
                 }
 
                 Ok((result, to_raw))
             }
             Request::Increase {
-                amount,
+                mut amount,
                 from_raw,
                 to_raw,
             } => {
                 let brightness = self.backlight.brightness()?;
-                let mut result: i32;
 
-                if from_raw {
-                    result = self.backlight.set_brightness(brightness + amount)?;
-                } else {
-                    let mapped_amount = self.map_percent_to_raw(amount)?;
-                    result = self.backlight.set_brightness(brightness + mapped_amount)?;
+                if !from_raw {
+                    amount = self.map_percent_to_raw(amount)?;
                 }
+
+                let mut result = self.backlight.set_brightness(brightness + amount)?;
 
                 if !to_raw {
                     result = self.map_raw_to_percent(result)?;
@@ -169,19 +164,17 @@ impl Daemon {
                 Ok((result, to_raw))
             }
             Request::Decrease {
-                amount,
+                mut amount,
                 from_raw,
                 to_raw,
             } => {
                 let brightness = self.backlight.brightness()?;
-                let mut result: i32;
 
-                if from_raw {
-                    result = self.backlight.set_brightness(brightness - amount)?;
-                } else {
-                    let mapped_amount = self.map_percent_to_raw(amount)?;
-                    result = self.backlight.set_brightness(brightness - mapped_amount)?;
+                if !from_raw {
+                    amount = self.map_percent_to_raw(amount)?;
                 }
+
+                let mut result = self.backlight.set_brightness(brightness - amount)?;
 
                 if !to_raw {
                     result = self.map_raw_to_percent(result)?;
