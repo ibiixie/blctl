@@ -1,79 +1,59 @@
 # blctl
-A D-Bus based **b**ack**l**ight **c**on**t**ro**l** daemon for Linux.
+
+A minimal **b**ack**l**ight **c**on**t**ro**l** daemon for Linux.
+
+## Features
+
+- Set brightness using `blctl set [OPTIONS] <LEVEL>`
+- Increase brightness using `blctl increase [OPTIONS] <AMOUNT>`
+- Decrease brightness using `blctl decrease [OPTIONS] <AMOUNT>`
+- Get brightness using `blctl get [OPTIONS]`
+- Get raw maximum brightness using `blctl get-max`
+- Optionally use raw backlight device driver values using `--from-raw` and `--to-raw`
 
 ## Usage
 
-You can call into blctl through the system-wide message bus.
+Using `blctl` is simple thanks to its easy-to-use command-line interface.
 
-Increase backlight brightness by 5%
+To list all commands and their options, run `blctl --help` and `blctl [COMMAND] --help` in your terminal.
 
-```bash
-$ busctl --system call me.xela.blctl /me/xela/blctl me.xela.blctl1 Increase u 5
-```
+By default, most commands take as input and print as a result to stdout a value
+between 0-100 inclusive. If an error is encountered, `blctl` will print the
+error to stderr and exit with a non-zero exit code.
 
-Decrease backlight brightness by 25%
+The function to map arbitrary backlight brightness levels to a 0-100 inclusive
+range is lossy in precision. If losslessness is required, use the `--from-raw`
+and `--to-raw` flags to specify brightness and print results in the
+arbitrary brightness range defined by your backlight device driver rather
+than the more portable but lossy mapped range.
 
-```bash
-$ busctl --system call me.xela.blctl /me/xela/blctl me.xela.blctl1 Decrease u 25
-```
+## Platforms
 
-## Config
+While only a NixOS flake is provided, `blctl` should in theory work on any
+Linux distribution with Sysfs support. For distributions other than NixOS,
+manual packaging is required. Systemd and Runit service configurations can
+be found in the `./service-configs/` directory of this repository.
 
-No config file exists by default, but one with the name `config.toml` can be created in `/etc/blctl` (e.g.: `touch "/etc/blctl/config.toml"`).
+### NixOS
 
-**Config options:**
+After adding this repository as a flake, `blctl` can be installed either by
+specifying the package in your  directly, or by using the module provided by the flake.
 
- * `interface_override`<br>*Allows for the automatically selected backlight interface to be overridden with a manually set path.*
+## Internals
 
-**Example config**
-
-```toml
-# /etc/blctl/config.toml
-
-# Allows for the automatically selected backlight interface to be overridden with a manually set path.
-# interface_override = "/sys/class/backlight/example_backlight/"
-```
-
-### Backlight keys
-
-If you want to setup blctl to be connected to the backlight keys on your keyboard, you can do so by configuring your desktop environment or window manager to call blctl via its system-wide message bus.
-
-Here is an example of how I accomplish this using Sway:
-
-```
-# ~/.config/Sway/config
-
-bindsym XF86MonBrightnessUp exec busctl --system call me.xela.blctl /me/xela/blctl me.xela.blctl1 Increase u 5
-bindsym XF86MonBrightnessDown exec busctl --system call me.xela.blctl /me/xela/blctl me.xela.blctl1 Decrease u 5
-```
-
-## Compiling and installing
-
-To compile and install blctl, simply run the `install.sh` script in the root directory of the repository:
-
-```bash
-$ ./install.sh
-```
-
-This will automatically install blctl to `/usr/bin/`.
-
-If you use runit, you can pass `--runit` as a parameter to the installer and it will automatically copy a default service configuration file for you:
-
-```bash
-$ ./install.sh --runit
-```
-
-If you use another init system, you will have to create your own service configuration to use with blctl. Feel free to contribute your config to `./service-configs/` if you do! :)
-
-Note that blctl at minimum requires read and write access to the sysfs backlight device directory (`/sys/class/backlight`) to function properly.
+Internally, `blctl` is written only in safe Rust with no reliance on any
+non-Rust dependencies. It uses Sysfs to communicate with the backlight device
+driver using simple file reads and writes, and uses a Unix domain socket for
+inter-process communication between the command-line interface (`blctl`)
+and the daemon (`blctld`).
 
 ## License
 
 Licensed under either of
 
- * Apache License, Version 2.0
-   ([LICENSE-APACHE](LICENSE-APACHE) or http://www.apache.org/licenses/LICENSE-2.0)
- * MIT license
-   ([LICENSE-MIT](LICENSE-MIT) or http://opensource.org/licenses/MIT)
+- Apache License, Version 2.0
+   ([LICENSE-APACHE](LICENSE-APACHE) or <http://www.apache.org/licenses/LICENSE-2.0>)
+- MIT license
+   ([LICENSE-MIT](LICENSE-MIT) or <http://opensource.org/licenses/MIT>)
 
 at your option.
