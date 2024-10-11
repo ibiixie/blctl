@@ -1,5 +1,6 @@
 [Unit]
 Description=A minimal backlight control daemon for Linux
+After=multi-user.target
 
 [Service]
 ExecStart=/usr/sbin/blctld
