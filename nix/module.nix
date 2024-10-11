@@ -24,6 +24,7 @@ in {
           ExecStart = "${config.services.blctl.package}/bin/blctld";
 	      };
         wantedBy = [ "multi-user.target" ];
+        after = [ "multi-user.target" ];
       };
     };
   };
