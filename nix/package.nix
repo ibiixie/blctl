@@ -11,8 +11,8 @@ in
     src = pkgs.fetchFromGitHub {
       owner = "imxela";
       repo = "blctl";
-      rev = "dae4445e06ae25e99030eebed70b5aee5abfbdec";
-      sha256 = "sha256-5J8rDVbruBfHsssbzTaY4uZaZMh8jJBYkgkpDnzcC0w=";
+      rev = "af4124f9ac0cb247c8b90791b0acfdb59c55d7ca";
+      sha256 = "sha256-9yz+O323ZMTdv3E0kzPfjHUZM4nokdK3PqoBsjwtwJQ=";
     };
 
     cargoLock = {
