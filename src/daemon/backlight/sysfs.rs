@@ -56,6 +56,13 @@ impl Backlight for Sysfs {
 }
 
 impl Sysfs {
+    /// Write to a backlight device file.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// self.device_write("brightness", 255.to_string().as_bytes())?;
+    /// ```
     fn device_write<'a, T>(&self, file_name: &str, value: T) -> Result<(), Box<dyn Error>>
     where
         T: Into<&'a [u8]>,
@@ -68,6 +75,13 @@ impl Sysfs {
         Ok(())
     }
 
+    /// Read from a backlight device file.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// let max = self.device_read::<i32>("max_brightness")?;
+    /// ```
     fn device_read<T>(&self, file_name: &str) -> Result<T, Box<dyn Error>>
     where
         T: FromStr + std::fmt::Debug,

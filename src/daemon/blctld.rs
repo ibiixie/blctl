@@ -123,6 +123,7 @@ impl Daemon {
         Ok(())
     }
 
+    /// Handle an incoming client request.
     fn handle_request(&self, request: Request) -> Result<(i32, bool), Box<dyn Error>> {
         println!("Handling request");
 
@@ -195,6 +196,8 @@ impl Daemon {
         }
     }
 
+    /// Map a value between 0-100 inclusive to the raw arbitrary range defined
+    /// by the backlight device driver.
     fn map_percent_to_raw(&self, brightness_percent: i32) -> Result<i32, Box<dyn Error>> {
         Ok(Self::map_range(
             brightness_percent,
@@ -205,6 +208,7 @@ impl Daemon {
         ))
     }
 
+    /// Map a raw backlight brightness level to a range between 0-100 inclusive.
     fn map_raw_to_percent(&self, brightness_raw: i32) -> Result<i32, Box<dyn Error>> {
         Ok(Self::map_range(
             brightness_raw,
@@ -215,7 +219,7 @@ impl Daemon {
         ))
     }
 
-    /// Maps an i32 to be within the specified range.
+    /// Maps the given range of numbers to the specified range.
     fn map_range(
         input: i32,
         input_start: i32,

@@ -9,6 +9,7 @@ pub struct Client {
 }
 
 impl Client {
+    /// Create an instance of the blctl client and connect to the daemon socket.
     pub fn new(path: &Path) -> Self {
         let socket = UnixStream::connect(path)
             .expect("unable to connect to daemon socket (is blctld running?)");
@@ -16,6 +17,7 @@ impl Client {
         Self { socket }
     }
 
+    /// Make a request to the daemon and return the response.
     pub fn request(&mut self, request: Request) -> Response {
         let request_data = bincode::serialize(&request).unwrap();
 
